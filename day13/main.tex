@@ -16,6 +16,8 @@
 \newtheorem{lemma}{Lemma}
 
 \newcommand{\divi}{\mathbin{\mid}}
+\newcommand{\tdiv}{\mathbin{~\mathrm{div}~}}
+\newcommand{\tmod}{\mathbin{~\mathrm{mod}~}}
 
 \title{Challenge Day 13 -- Arithmetics and Buses}
 \author{}
@@ -36,7 +38,7 @@ Let $I \subseteq \mathbb{N}$ be a finite, indexing set, starting at 0\footnote{$
 For any bus ID $n_i$ ($i \in I$), we give the sequence of timestamps at which the bus arrives: $(T(n_i)_k)_{k \in \mathbb{N}}$, with:
 $$\forall k \in \mathbb{N}, T(n_i)_k = k n_i$$
 
-\paragraph{For 2 Buses} Let us say $I = {0, i_1}$ for the sake of explanation. We want to find the earliest $\hat t$ such that:
+\paragraph{For 2 Buses} Let us say $I = \{0, i_1\}$ for the sake of explanation. We want to find the earliest $\hat t$ such that:
 $$\exists \hat k_0, \hat k_1 \in \mathbb{N}, \hat t = T(n_0)_{\hat k_0} \ \mathrm{and}\ T(n_0)_{\hat k_0} = T(n_{i_1})_{\hat k_1} + i_1$$
 
 To do so, we first try to fin any $k_0, k_1$ such that:
@@ -61,22 +63,141 @@ Note that any equation ($i \in I \setminus \{ 0 \}$) of this system generate a (
 
 In this section, we provide a bit of background in arithmetics as to help understanding the resolution of the problem.
 
-\subsection{Basic Building Blocks}
-
 Arithmetics is the branch of mathematics that handles integers. We denote $\mathbb{Z}$ the set of integers (or ``relative'' integers), i.e. numbers that are not decimal or reals, and may be negative or positive. $\mathbb{N}$ is the subset of $\mathbb{Z}$ consisting of positive integers (also called \textit{natural numbers}).
 
+\subsection{Divisibility, Greatest Common Divider}
+
+One of the first major concept of arithmetics is the concept of \textit{divisibility}. Indeed, in the domain of integers, dividing two numbers does not always have sense. For instance, 6 divided by 2 is 3, which is okay; but 3 divided by 2 is not an integer number (it ``does not exist'' in the realms of integers).
+
 \begin{definition}[Divisibility]
-Let $a,b \in \mathbb{Z}$. We say that $a$ is \textbf{divisible by} $b$ or that $b$ is a \textbf{divider} of $a$, and we write $a \divi b$ if there exists $k \in \mathbb{Z}$ such that $a = k b$.
+Let $a,b \in \mathbb{Z}$. We say (equivalently) that:
+\begin{itemize}
+\item $a$ is \textbf{divisible by} $b$
+\item $b$ is a \textbf{divider} of $a$
+\item $a$ is a \textbf{multiple} of $b$
+\end{itemize}
+\noindent and we write $a \divi b$ if there exists $k \in \mathbb{Z}$ such that $a = k b$.
 \end{definition}
 
-Note that 0 is divisible by everything, but nothing is divisible by 0 (as for any $k$, $0 k = 0$). Note also that everything is divisible by 1 (as $1 k = k$).
+Note that 0 is divisible by everything, but nothing is divisible by 0 (as for any $k$, $0 k = 0$). Note also that everything is divisible by 1 but 1 is divisible by nothing else than itself (as $k = 1 k$). Finally, note that $a \divi a$ for any $a \in \mathbb{Z} \setminus \{ 0 \}$ (because $a = 1 a$).
+
+If $a \divi b$ then $-a \divi b$ (i.e. if $a = k b$ then $- a = (- k) b$) and, if $a \divi b$ then $a \divi -b$ (i.e. if $a = k b$ then $a = (-k) (-b)$); this means that, in general, handling natural numbers is "mostly the same" as handling integers.
 
 \begin{definition}[Set of Dividers]
-We note $\Delta(a)$ the set of (positive) dividers of $a$. Formally:
+Let $a \in \mathbb{Z}$. We note $\Delta(a)$ the set of (positive) dividers of $a$. Formally:
 $$\Delta(a) = \{ b \in \mathbb{N} \mid a \divi b \}$$
 \end{definition}
 
-\begin{definition}[Multiples]
+Note that we could consider the set of \textbf{all} dividers of $a$, which $\Delta(a)$ plus the opposite of any number in $\Delta(a)$. Following our priori remark though, this is unnecessary.
+
+\begin{property}[Properties of the Set of Dividers]
+Let $a \in \mathbb{Z}$. The set $\Delta(a)$ has the following properties:
+\begin{itemize}
+\item $a \in \Delta(a)$ and $1 \in \Delta(a)$ (because $a = 1 \times a$) ;
+\item $\forall b \in \Delta(a), 0 < b \leq a$ ;
+\item $\Delta(0) = \mathbb{N} \setminus \{ 0 \}$, $\Delta(1) = \{ 1 \}$ ;
+\end{itemize}
+\end{property}
+
+The set of dividers is convenient to formally define \textit{prime numbers}.
+
+\begin{definition}[Prime Number]
+Let $p \in \mathbb{N}$. $p$ is \textbf{prime} if and only if the cardinality of its set of dividers is exactly equal to $2$:
+$$p \ \mathrm{prime} \ \Leftrightarrow\ \mathrm{card}(\Delta(p)) = 2$$
+\end{definition}
+
+From this definition, and by noticing that we always have $a \in \Delta(p)$ and $1 \in \Delta(p)$, we note that this definition is equivalent to ``\textit{$p \in \mathbb{N}$ is prime if and only if its only dividers is $1$ and itself.}''
+
+In particular, this means that 0 and 1 are \textbf{not} prime numbers.
+
+\medskip
+
+Finally, let us take $a,b \in \mathbb{Z}$. We note $\Delta(a,b) = \Delta(a) \cap \Delta(b)$ the intersection of the set of dividers of $a$ and $b$. If $a$ and $b$ are not null, this intersection is never empty ($1 \in \Delta(a)$ and $1 \in \Delta(b)$).
+
+By the definition of the intersection, $\Delta(a,b)$ contains any number that divides \textbf{both} $a$ \textbf{and} $b$. This set is usually called \textit{set of the common dividers of $a$ and $b$}.
+
+Because $\Delta(a)$ and $\Delta(b)$ are (lower and upper) bounded subsets of $\mathbb{Z}$, they are finite. Subsequently, $\Delta(a,b)$ is finite as well, and it thus admits a maximum:
+
+\begin{definition}[Greatest Common Divider (GCD)]
+Let $a, b \in \mathbb{Z}$ not identically null (i.e. $a$ and $b$ cannot be simultaneously null). The maximum of the set set of common dividers $\max(\Delta(a,b))$ is called the \textbf{greatest common divider} of $a$ and $b$.
+
+It is usually denoted $\mathrm{gcd}(a,b)$, $\delta(a,b)$ or $a \wedge b$.
+\end{definition}
+
+If $a$ and $b$ are not identically null, their GCD always exists, and is necessarily greater or equal to 1. If it is equal to 1, we say that $a$ and $b$ are co-prime:
+
+\begin{definition}[Co-prime Numbers]
+Let $a,b \in \mathbb{Z}$ not identically null. $a$ and $b$ are \textbf{co-prime} if and only if their GCD is equal to 1:
+$$\delta(a,b) = 1$$
+\end{definition}
+
+The GCD has some interesting properties, that directly come from the nature of divisibility:
+
+\begin{property}[Some Properties of the GCD]
+Let $a,b \in \mathbb{Z}$ not identically null:
+\begin{enumerate}
+\item $a \divi \delta(a,b)$ and $b \divi \delta(a,b)$ (by definition) ;
+\item $\delta(a,b) = \delta(b,a)$ (because intersection is commutative) ;
+\item $0 < \delta(a,b) < \min(a,b)$ ;
+\item $\delta(1,a) = \delta(a,1) = 1$ (consequence of the previous property) ;
+\item if $a \neq 0$, $\delta(a,a) = a$ ;
+\item $\delta(-a,-b) = \delta(-a,b) = \delta(a,-b) = \delta(a,b)$ ;
+\item if $a \neq 0$, $\delta(a,0) = a$ (because $\Delta(0) = \mathbb{N} \setminus \{ 0 \}$) ;
+\item for any $c \mathbf{Z} \setminus \{ 0 \}$: $\delta(a c, b c) = \delta(a,b)$ ;
+\end{enumerate}
+\end{property}
+
+A quick note on the case where $a = b = 0$: it is tempting to write $\delta(0,0) = 0$ because of the fifth and seventh properties presented here. Formally, this is wrong: \textbf{the GCD is \textit{not} defined for $(0,0)$}. The reason for that is that $\Delta(0) = \mathbb{N}$, and thus that $\Delta(0,0) = \mathbb{N} \cap \mathbb{N} = \mathbb{N}$. $\mathbb{N}$ being unbounded, it \textbf{does not have a maximum}.
+
+The formula $\delta(0,0) = \max(\Delta(0,0))$ is thus \textbf{invalid and meaningless}.
+
+Some people perform some kind of \textit{function prolongation}, with the argument that ``we deduce naturally from properties 5 and 7 that $\delta(0,0)$ must surely equal to $0$''. You do that if you want, but this is technically wrong, and may cause errors in demonstrations. Be careful!
+
+
+\subsection{Euclidean Division and Euclid Algorithm}
+
+Rational and real numbers have a \textit{division operator}, generally denoted $\cdot / \cdot$. Given two number $a$ and $b$ with $b$ not null, $q = a / b$ is a number such that $a = b q$.
+
+This division operation, as it is formulated right now, does not work for any pair of integers. In fact, it only work for pairs $(a,b) \in \mathbb{Z}^2$ such that $b \neq 0$ and $a \divi b$. By definition, $a \divi b$ implies that there exists $k \in \mathbb{Z}$ such that $a = k b$. We see here that, if $a$ is divisible by $b$, then $a / b$ is equal to that $k$.
+
+For any pair $(a,b)$ such that $a \not\divi b$ ($a$ not divisible by $b$), the $/$ operator is \textbf{not defined}; i.e. $a / b$ does not exist.
+
+\medskip
+
+That being said, by twisting a little bit the concept of division, we can create a new type of division that works on any number (except 0): the Euclidean division.
+
+\begin{definition}[Euclidean Division]
+Let $a,b \in \mathbb{Z}$ and $b \neq 0$. There exist $q \in \mathbb{Z}$ and $r \in \mathbb{N}$ such that:
+$$a = b q + r$$
+\noindent with $0 \leq r < b$. The pair $(q,r)$ is the result of the \textbf{Euclidean division} of $a$ by $b$. $q$ is called the \textbf{quotient}, and $r$ is called the \textbf{remainder}.
+\end{definition}
+
+In general, the quotient of the Euclidean division of $a$ by $b$ is denoted $\div$ or $\tdiv$. The remainder is usually denoted $\tmod$, or $\%$. The Euclidean division is usually what people mean when they think of ``integer'' division.
+
+Euclidean division has numerous interesting properties.
+
+\begin{property}[Properties of the Euclidean Division]
+Let $a,b \in \mathbb{Z}$ and $b \neq 0$:
+\begin{enumerate}
+\item $a \divi b \Leftrightarrow a \tmod b = 0$, and $a \div b = a / b$ ;
+\item $a = a 1 + 0$, so $a \div 1 = a$ and $a \tmod 1 = 0$ ;
+\item $1 = 0 b + 1$, so $1 \div b = 0$ and $1 \tmod b = 1$ ;
+\item More generally, if $b > a$: $a = 0 b + a$, so $a \div b = 0$ and $a \tmod b = a$ ;
+\end{enumerate}
+\end{property}
+
+There is an interesting connection between GCD and Euclidean divisions, that leads to the definition of the Euclid algorithm:
+
+\begin{theorem}[Euclidean Division and GCD]
+Let $a,b \in \mathbb{Z}$ with $b \neq 0$. Let $(q,r)$ be the result of the Euclidean division of $a$ by $b$ (i.e. $q = a \div b$ and $r = a \tmod b$). We have:
+$$\delta(a,b) = \delta(b,r)$$
+\end{theorem}
+
+Finding the GCD of $a$ and $b$ is thus like calculating $r = a \tmod b$ and finding the GCD of $b$ and $r$, which can be obtained the same way (i.e. $r' = b \tmod r$ and finding the GCD of $r$ and $r'$, and so on) until $r = 0$ (because then $\delta(x,0) = x$).
+
+This procedure is called \textit{Euclid's algorithm}. Note that it is recursive.
+
+
 
 \subsection{Diophantine Equations}
 
@@ -87,21 +208,51 @@ A Diophantine equation is any polynomial equation that admits integer solutions.
 \end{definition}
 
 \begin{definition}[Linear Diophantine Equation]
-A \textbf{linear} Diophantine equation is a Diophantine equation where the unknowns are monomic, i.e. elevated to the power 1.
-
-Formally:
+A \textbf{linear} Diophantine equation is a Diophantine equation where the unknowns are monomic, i.e. elevated to the power 1. Formally:
 $$a_1 x_1 + a_2 x_2 + \ldots + a_N x_N = c$$
 
 \noindent where $(a_k)$ and $c$ are constants and $(x_k)$ are the unknowns.
 \end{definition}
 
-Note that we interest ourselves to linear Diophantine equations with two unknowns for now (i.e. $N = 2$).
+We interest ourselves to linear Diophantine equations with two unknowns for now (i.e. $N = 2$).
 
 \begin{definition}[Bézout Identity]
-A two-unknown linear Diophantine equation
+Let $a,b,c \in \mathbb{Z}$ with $a$ and $b$ not identically null. A two-unknown linear Diophantine equation
 $$a x + b y = c$$
-\noindent where $c$ is \textbf{greatest common divider} of $a$ and $b$ is called a \textbf{Bézout identity}.
+\noindent where $c$ is the \textbf{greatest common divider} of $a$ and $b$ is called a \textbf{Bézout identity}.
 \end{definition}
+
+Bézout identity are interesting because they are ``fairly easily solvable''. Note that general case of two-unknown linear Diophantine equations can be reduced to Bézout identities under certain conditions.
+
+\begin{theorem}[Solvability and Reduction of Diophantine Equations]\label{th:solv}
+Let $a,b,c \in \mathbb{Z}$ with $a$ and $b$ not identically null. If $c \divi \delta(a,b)$, then the equation:
+$$a x + b y = c$$
+\noindent is equivalent to the equation:
+$$a' x + b' y = c'$$
+\noident where $a = a' \delta(a,b)$, $b = b' \delta(a,b)$, $c = c' \delta(a,b)$. This new equation is a Bézout identity.
+\end{theorem}
+
+To resolve Bézout identities, we rely on the Bachet--Bézout theorem:
+
+\begin{theorem}[Bachet--Bézout Theorem]
+Let $a,b \in \mathbb{Z}$ with $a$ and $b$ \textbf{co-prime}. Then the equation
+$$a x + b y = 1$$
+\noindent always admits a (countable) infinite number of solutions. If $(x_0,y_0)$ is a particular solution of the equation, then the set of solutions to this equation is:
+$$\{ (x_0 + b k, y_0 - a k) \mid k \in \mathbb{Z} \}$$
+\end{theorem}
+
+The difficulty then is to find a particular solution $(x_0,y_0)$ to the equation. One way of doing so is by using the \textit{extended Euclid algorithm} (more on that later). For now, suppose we managed to find such a particular solution.
+
+\begin{theorem}[Bézout Identity Solutions]
+Let $a,b,c \in \mathbb{Z}$ where $a$ and $b$ are \textbf{co-prime}. Let $(x_0,y_0)$ be a particular solution of the equation 
+$$a x + b y = 1$$
+\noindent then the equation $a x + b y = c$ admits a (countable) infinite number of solutions. A particular solution of this equation $(x_1,y_1)$ is then $(c x_0, c y_1)$, and the set of solutions is:
+$$\{ (x_1 + b k, y_1 - a k) \mid k \in \mathbb{Z} \}$$
+\end{theorem}
+
+Note that, by virtue of Theorem \ref{th:solv}, the solutions of $a x + b y = c$ are the solutions of $n a x + n b y = n c$ for any $n \neq 0$.
+
+
 
 \end{document}
 
