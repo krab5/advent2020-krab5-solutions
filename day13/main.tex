@@ -1,0 +1,108 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage[hmargin=1.0in,vmargin=1.0in]{geometry}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{property}{Property}
+\newtheorem{lemma}{Lemma}
+
+\newcommand{\divi}{\mathbin{\mid}}
+
+\title{Challenge Day 13 -- Arithmetics and Buses}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+Let $I \subseteq \mathbb{N}$ be a finite, indexing set, starting at 0\footnote{$I$ does not have to be finite for the reasoning, but it does for the algorithm. Also, it technically does not have to start with 0, although it is more convenient (one can always obtain $I' \subseteq \mathbb{N}$ starting at 0 from any $I$ by offsetting every $i \in I$ by $\min(I)$)}. Let $(n_i)_{i\in I}$ be a sequence of \textit{bus IDs}. Buses all start their round at the same timestamp $t = 0$ (in minutes). They complete one round in a number of minutes equal to their idea (i.e., they arrive at their beginning point at every $t = n_i * k$, $k \in \mathbb{N}$).
+
+\medskip
+
+\noindent\textbf{Question:} what is the earliest (i.e. smallest) timestamp $t$ such that, for all $i$, bus number $i$ arrives at $t + i$?
+
+
+\section{Modelling the Problem}
+
+For any bus ID $n_i$ ($i \in I$), we give the sequence of timestamps at which the bus arrives: $(T(n_i)_k)_{k \in \mathbb{N}}$, with:
+$$\forall k \in \mathbb{N}, T(n_i)_k = k n_i$$
+
+\paragraph{For 2 Buses} Let us say $I = {0, i_1}$ for the sake of explanation. We want to find the earliest $\hat t$ such that:
+$$\exists \hat k_0, \hat k_1 \in \mathbb{N}, \hat t = T(n_0)_{\hat k_0} \ \mathrm{and}\ T(n_0)_{\hat k_0} = T(n_{i_1})_{\hat k_1} + i_1$$
+
+To do so, we first try to fin any $k_0, k_1$ such that:
+\begin{equation}\label{eqn:2buses}
+k_0 n_0 - k_1 n_{i_1} = i_1
+\end{equation}
+
+\paragraph{For $N$ Buses ($N \geq 2$)} For any number of buses, we obtain an $N-1$ equations, $N$ unknowns system:
+\begin{equation}\label{eqn:nbuses}
+\left\{\begin{array}{lcl}
+k_0 n_0 - k_1 n_{i_1} & = & i_1 \\
+k_0 n_0 - k_2 n_{i_2} & = & i_2 \\
+& \vdots & \\
+k_0 n_0 - k_N n_{i_N} & = & i_N
+\end{array}\right.
+\end{equation}
+
+Note that any equation ($i \in I \setminus \{ 0 \}$) of this system generate a (countable) infinite family of solutions (if it is solvable; hopefully it is) $\{ (k_0,k_i) \}$. The intersection of these families gives another ``sparser'', yet infinite, family of solutions for $k_0$. The positive minimum of this family, $\hat k_0$, allows us to calculate the answer to the question, $\hat t = \hat k_0 n_0$.
+
+
+\section{Mathematical Background}
+
+In this section, we provide a bit of background in arithmetics as to help understanding the resolution of the problem.
+
+\subsection{Basic Building Blocks}
+
+Arithmetics is the branch of mathematics that handles integers. We denote $\mathbb{Z}$ the set of integers (or ``relative'' integers), i.e. numbers that are not decimal or reals, and may be negative or positive. $\mathbb{N}$ is the subset of $\mathbb{Z}$ consisting of positive integers (also called \textit{natural numbers}).
+
+\begin{definition}[Divisibility]
+Let $a,b \in \mathbb{Z}$. We say that $a$ is \textbf{divisible by} $b$ or that $b$ is a \textbf{divider} of $a$, and we write $a \divi b$ if there exists $k \in \mathbb{Z}$ such that $a = k b$.
+\end{definition}
+
+Note that 0 is divisible by everything, but nothing is divisible by 0 (as for any $k$, $0 k = 0$). Note also that everything is divisible by 1 (as $1 k = k$).
+
+\begin{definition}[Set of Dividers]
+We note $\Delta(a)$ the set of (positive) dividers of $a$. Formally:
+$$\Delta(a) = \{ b \in \mathbb{N} \mid a \divi b \}$$
+\end{definition}
+
+\begin{definition}[Multiples]
+
+\subsection{Diophantine Equations}
+
+We recall the concept of Diophantine equations, and interest ourselves to the particular case of linear, two-unknown equations, close to our problem.
+
+\begin{definition}[Diophantine Equation]
+A Diophantine equation is any polynomial equation that admits integer solutions.
+\end{definition}
+
+\begin{definition}[Linear Diophantine Equation]
+A \textbf{linear} Diophantine equation is a Diophantine equation where the unknowns are monomic, i.e. elevated to the power 1.
+
+Formally:
+$$a_1 x_1 + a_2 x_2 + \ldots + a_N x_N = c$$
+
+\noindent where $(a_k)$ and $c$ are constants and $(x_k)$ are the unknowns.
+\end{definition}
+
+Note that we interest ourselves to linear Diophantine equations with two unknowns for now (i.e. $N = 2$).
+
+\begin{definition}[Bézout Identity]
+A two-unknown linear Diophantine equation
+$$a x + b y = c$$
+\noindent where $c$ is \textbf{greatest common divider} of $a$ and $b$ is called a \textbf{Bézout identity}.
+\end{definition}
+
+\end{document}
+
+
